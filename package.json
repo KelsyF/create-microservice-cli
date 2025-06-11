@@ -1,0 +1,14 @@
+{
+    "name": "create-microservice",
+    "version": "1.0.0",
+    "description": "CLI tool that generates containerized microservice templates",
+    "main": "index.js",
+    "type": "module",
+    "bin": {
+        "create-microservice": "index.js"
+    },
+    "dependencies": {
+        "fs-extra": "^11.1.1",
+        "inquirer": "^9.2.6"
+    }
+}
