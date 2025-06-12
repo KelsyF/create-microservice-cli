@@ -9,6 +9,7 @@
     },
     "dependencies": {
         "fs-extra": "^11.1.1",
-        "inquirer": "^9.2.6"
+        "inquirer": "^9.2.6",
+        "open": "^10.1.2"
     }
 }

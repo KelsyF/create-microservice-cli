@@ -6,6 +6,8 @@ import inquirer from 'inquirer';
 import path from 'path';
 import fs from 'fs-extra';
 import { fileURLToPath } from 'url';
+import { execSync, spawn } from 'child_process';
+import open from 'open';
 
 // Support __dirname in ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -16,9 +18,10 @@ async function main() {
     
     // Check for flags
     const args = process.argv.slice(2);
-    const validFlags = ['--help', '--force'];
+    const validFlags = ['--help', '--force', '--auto'];
 
     let showHelp = args.includes('--help');
+    let runSetup = args.includes('--auto');
     const forceFlag = args.includes('--force');
 
     const unknownFlag = args.filter(arg => arg.startsWith('--') && !validFlags.includes(arg));
@@ -36,6 +39,7 @@ async function main() {
         node index.js [options]
 
     Options:
+        --auto      Skip automation prompt and run setup procedure
         --force     Skip overwrite prompt if folder already exists
         --help      Show this help message
     
@@ -98,12 +102,66 @@ async function main() {
 
     console.log("Project scaffolded!!");
 
+    // Post-gen automation prompt and execution: npm install + git init
+    // Show prompt if --auto flag not used
+    if (!runSetup) {
+        const { automateSetup } = await inquirer.prompt([
+            {
+                type: "confirm",
+                name: "automateSetup",
+                message: "Would you like to automate the next steps? This includes:\nInstalling dependencies\nInitializing git repo\n" +
+                            "Building Docker image\nChecking test template was created\nOpening container\n",
+                default: true,
+            },
+        ]);
+
+        runSetup = automateSetup;
+    }
+
+    if (runSetup) {
+        try {
+            console.log("\nInstalling dependencies...");
+            execSync('npm install', {cwd: targetDir, stdio: 'inherit' });
+
+            console.log("\nInitializing git repo...");
+            execSync('git init', { cwd: targetDir, stdio: 'ignore' });
+            execSync('git add .', {cwd: targetDir });
+            execSync('git commit -m "Initial commit from create-microservice CLI"', { cwd: targetDir });
+
+            console.log(`Buidling Docker image '${projectName}'...`);
+            execSync(`docker build -t ${projectName} .`, { cwd: targetDir, stdio: 'inherit' });
+
+            console.log(`\n Running Docker container (port 3000)...`);
+            const container = spawn('docker', ['run', '--rm', '-p', '3000:3000', projectName], {
+                cwd: targetDir,
+                stdio: 'inherit'
+            });
+
+            console.log("\nRunning tests...");
+            execSync('npm test', { cwd: targetDir, stdio: 'inherit' });
+
+            // Open browser after delay
+            setTimeout(() => {
+                open('http://localhost:3000');
+            }, 1000);
+
+            container.on('exit', (code) => {
+                console.log(`\nDocker container exited with code ${code}`);
+            });
+
+            console.log("Setup and run complete!!");
+            return;
+        } catch (err) {
+            console.warn("Automation failed: ", err.message);
+        }
+    }
+
     console.log("\nNext Steps: ");
     console.log(`   cd ${projectName}`);
-    console.log("   npm install");
     console.log("   node app.js");
     console.log("   docker build -t my-service .");
     console.log("   npm test");
+
 }
 
 main();
