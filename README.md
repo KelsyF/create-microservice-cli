@@ -15,8 +15,8 @@ A CLI tool that scaffolds production-ready, containerized microservice projects 
 
 ## Future Plans
 - Support multiple languages(Python, Go)
-~~- Add --force CLI flag~~ (added 6/11)
-~~- Add post-gen automation (git init, npm install, etc.)~~
+- ~~-Add --force CLI flag~~ (added 6/11)
+- ~~-Add post-gen automation (git init, npm install, etc.)~~ (added 6/11)
 
 ## Usage
 
