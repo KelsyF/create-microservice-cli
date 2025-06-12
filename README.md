@@ -80,6 +80,7 @@ test-api/
 
 ## Future Plans
 
+- Generate a proper package.json to publish to `npm` so it can be run via `npx create-microservice`
 - Support multiple languages(Python, Go)
 - ~~-Add --force CLI flag~~ (added 6/11)
 - ~~-Add post-gen automation (git init, npm install, etc.)~~ (added 6/11)
