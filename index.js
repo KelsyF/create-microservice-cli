@@ -39,7 +39,12 @@ async function main() {
         node index.js [options]
 
     Options:
-        --auto      Skip automation prompt and run setup procedure
+        --auto      Skip automation prompt and automatically:
+                        - install dependencies
+                        - initialize git
+                        - build and run Docker container
+                        - open browser
+                        - run tests
         --force     Skip overwrite prompt if folder already exists
         --help      Show this help message
     
